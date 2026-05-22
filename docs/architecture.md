@@ -37,7 +37,7 @@ Recommended actions:
 Create only one LIFF app in LINE Developers. Point its endpoint URL to your deployed LIFF base, for example:
 
 ```text
-https://helfer-black.vercel.app/liff
+https://helfer-brown.vercel.app/liff
 ```
 
 LINE native image upload is also supported: users can send an image directly in chat and `/api/line/webhook` will process it.
