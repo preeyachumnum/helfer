@@ -19,7 +19,7 @@ export async function analyzeWithHermes(
     return { ...cached.value, cached: true };
   }
 
-  if (!env.HERMES_ENDPOINT) {
+  if (!env.HERMES_ENDPOINT || env.HERMES_ENDPOINT === "disabled") {
     const fallback = fallbackAnalysis(summary);
     cache.set(cacheKey, {
       value: fallback,
