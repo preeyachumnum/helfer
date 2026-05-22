@@ -6,6 +6,7 @@ import jsQR from "jsqr";
 import sharp from "sharp";
 import { createWorker } from "tesseract.js";
 import { promisify } from "util";
+import { google } from "googleapis";
 import { env } from "./env";
 import type { SlipExtraction, TransactionType } from "./types";
 
@@ -36,7 +37,16 @@ async function processWithNode(imageBuffer: Buffer): Promise<SlipExtraction> {
       return qrResult;
     }
 
-    const ocrText = await readText(imageBuffer);
+    if (env.GOOGLE_VISION_OCR === "enabled") {
+      const visionText = await readTextWithGoogleVision(imageBuffer);
+      return extractSlip([visionText, qrText].filter(Boolean).join("\n"));
+    }
+
+    if (process.env.NODE_ENV === "production") {
+      return qrResult;
+    }
+
+    const ocrText = await readTextWithTesseract(imageBuffer);
     return extractSlip([ocrText, qrText].filter(Boolean).join("\n"));
   } catch (error) {
     return emptyResult(error instanceof Error ? error.message : "Node slip processor failed");
@@ -55,7 +65,52 @@ async function readQr(imageBuffer: Buffer) {
   return code?.data ?? "";
 }
 
-async function readText(imageBuffer: Buffer) {
+async function readTextWithGoogleVision(imageBuffer: Buffer) {
+  if (!env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !env.GOOGLE_PRIVATE_KEY) {
+    throw new Error("Google Vision OCR is enabled but Google service account credentials are missing");
+  }
+
+  const auth = new google.auth.JWT({
+    email: env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    key: env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    scopes: ["https://www.googleapis.com/auth/cloud-platform"]
+  });
+  const token = await auth.getAccessToken();
+
+  const response = await fetch("https://vision.googleapis.com/v1/images:annotate", {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${token.token}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      requests: [
+        {
+          image: { content: imageBuffer.toString("base64") },
+          features: [{ type: "TEXT_DETECTION", maxResults: 1 }],
+          imageContext: { languageHints: ["th", "en"] }
+        }
+      ]
+    })
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`Google Vision OCR failed: ${response.status} ${detail.slice(0, 180)}`);
+  }
+
+  const data = (await response.json()) as {
+    responses?: Array<{ fullTextAnnotation?: { text?: string }; error?: { message?: string } }>;
+  };
+  const first = data.responses?.[0];
+  if (first?.error?.message) {
+    throw new Error(`Google Vision OCR failed: ${first.error.message}`);
+  }
+
+  return first?.fullTextAnnotation?.text ?? "";
+}
+
+async function readTextWithTesseract(imageBuffer: Buffer) {
   const png = await sharp(imageBuffer)
     .rotate()
     .resize({ width: 1800, withoutEnlargement: true })

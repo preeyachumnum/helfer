@@ -3,12 +3,19 @@
 import liff from "@line/liff";
 import { ChangeEvent, useEffect, useState } from "react";
 
+type UploadResult = {
+  amount?: number;
+  type?: string;
+  bank?: string;
+  confidence?: number;
+};
+
 export default function UploadPage() {
   const [ready, setReady] = useState(false);
   const [idToken, setIdToken] = useState("");
   const [status, setStatus] = useState("เลือกรูปสลิปเพื่อบันทึก");
   const [error, setError] = useState("");
-  const [result, setResult] = useState<{ amount?: number; type?: string; bank?: string } | null>(null);
+  const [result, setResult] = useState<UploadResult | null>(null);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -40,6 +47,9 @@ export default function UploadPage() {
     setResult(null);
     setStatus("กำลังอ่านข้อมูลจากสลิป...");
 
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 55000);
+
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -47,18 +57,29 @@ export default function UploadPage() {
 
       const response = await fetch("/api/slips/upload", {
         method: "POST",
-        body: formData
+        body: formData,
+        signal: controller.signal
       });
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "อ่านสลิปไม่สำเร็จ");
+      const data = await safeJson(response);
+      if (!response.ok) {
+        const reason = data?.result?.reasons?.[0] ? ` (${data.result.reasons[0]})` : "";
+        throw new Error(`${data?.message || "อ่านสลิปไม่สำเร็จ"}${reason}`);
+      }
 
       setResult(data.record);
       setStatus("บันทึกสลิปเรียบร้อยแล้ว");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
+      const message =
+        err instanceof DOMException && err.name === "AbortError"
+          ? "อ่านสลิปนานเกินไป กรุณาลองรูปที่ชัดขึ้น หรือใช้เมนูกรอกเอง"
+          : err instanceof Error
+            ? err.message
+            : "เกิดข้อผิดพลาด";
+      setError(message);
       setStatus("เลือกรูปสลิปเพื่อบันทึก");
     } finally {
+      window.clearTimeout(timeoutId);
       setUploading(false);
       event.target.value = "";
     }
@@ -69,7 +90,7 @@ export default function UploadPage() {
       <section className="shell stack">
         <div className="header">
           <h1 className="title">บันทึกจากสลิป</h1>
-          <p className="subtle">ระบบจะอ่านรูปชั่วคราวและเก็บเฉพาะข้อมูลตัวอักษร</p>
+          <p className="subtle">ระบบอ่านรูปชั่วคราวและเก็บเฉพาะข้อความ</p>
         </div>
 
         <div className="panel stack">
@@ -96,6 +117,14 @@ export default function UploadPage() {
       </section>
     </main>
   );
+}
+
+async function safeJson(response: Response) {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
 }
 
 function formatMoney(value: number) {

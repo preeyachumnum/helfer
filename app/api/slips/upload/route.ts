@@ -5,38 +5,61 @@ import { verifyLiffIdToken } from "@/lib/lineAuth";
 import { processSlipImage } from "@/lib/slipProcessor";
 import type { SlipExtraction, TransactionRecord } from "@/lib/types";
 
+export const runtime = "nodejs";
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
-  const formData = await request.formData();
-  const file = formData.get("file");
-  const idToken = formData.get("idToken");
+  try {
+    const formData = await request.formData();
+    const file = formData.get("file");
+    const idToken = formData.get("idToken");
 
-  if (!(file instanceof File)) {
-    return NextResponse.json({ error: "missing file" }, { status: 400 });
-  }
+    if (!(file instanceof File)) {
+      return NextResponse.json({ error: "missing_file", message: "ไม่พบไฟล์รูปภาพ" }, { status: 400 });
+    }
 
-  if (typeof idToken !== "string") {
-    return NextResponse.json({ error: "missing idToken" }, { status: 401 });
-  }
+    if (typeof idToken !== "string" || !idToken) {
+      return NextResponse.json({ error: "missing_id_token", message: "ไม่พบข้อมูลยืนยันตัวตน LINE" }, { status: 401 });
+    }
 
-  const { lineUserId } = await verifyLiffIdToken(idToken);
-  const result = await processSlipImage(Buffer.from(await file.arrayBuffer()));
+    const { lineUserId } = await verifyLiffIdToken(idToken);
+    const imageBuffer = Buffer.from(await file.arrayBuffer());
+    const result = await withTimeout(processSlipImage(imageBuffer), 45000);
 
-  if (!result.isSlip || !result.amount) {
+    if (!result.isSlip || !result.amount) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "not_slip",
+          message: "อ่านข้อมูลสลิปไม่สำเร็จ กรุณาลองรูปสลิปที่ชัดขึ้น หรือใช้เมนูกรอกเอง",
+          result
+        },
+        { status: 422 }
+      );
+    }
+
+    const record = slipToTransaction(result, lineUserId);
+    await appendTransaction(record);
+
+    return NextResponse.json({ ok: true, record, result });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดระหว่างอ่านสลิป";
     return NextResponse.json(
       {
         ok: false,
-        error: "not_slip",
-        message: "รูปนี้ดูเหมือนไม่ใช่สลิปโอนเงิน กรุณาอัปโหลดสลิปใหม่ หรือใช้เมนูกรอกเอง",
-        result
+        error: "upload_failed",
+        message,
+        result: {
+          isSlip: false,
+          type: "unknown",
+          rawText: "",
+          confidence: 0,
+          reasons: [message]
+        }
       },
-      { status: 422 }
+      { status: message.includes("timed out") ? 504 : 500 }
     );
   }
-
-  const record = slipToTransaction(result, lineUserId);
-  await appendTransaction(record);
-
-  return NextResponse.json({ ok: true, record, result });
 }
 
 function slipToTransaction(slip: SlipExtraction, lineUserId: string): TransactionRecord {
@@ -57,4 +80,17 @@ function slipToTransaction(slip: SlipExtraction, lineUserId: string): Transactio
     confidence: slip.confidence,
     status: slip.confidence >= 0.65 ? "confirmed" : "needs_review"
   };
+}
+
+async function withTimeout<T>(promise: Promise<T>, ms: number) {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error("Slip OCR timed out")), ms);
+  });
+
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
 }
