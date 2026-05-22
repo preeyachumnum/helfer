@@ -75,7 +75,7 @@ export default function UploadPage() {
         <div className="panel stack">
           <label className="field">
             <span>รูปสลิป</span>
-            <input className="input" type="file" accept="image/*" capture="environment" disabled={!ready || uploading || !idToken} onChange={upload} />
+            <input className="input" type="file" accept="image/*" disabled={!ready || uploading || !idToken} onChange={upload} />
           </label>
 
           <div className={`status ${error ? "error" : ""}`}>{error || status}</div>

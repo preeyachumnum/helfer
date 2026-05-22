@@ -22,7 +22,7 @@ const schema = z.object({
   HERMES_ENDPOINT: optionalUrl,
   HERMES_API_KEY: optionalString,
   HERMES_CACHE_TTL_SECONDS: z.coerce.number().int().positive().default(21600),
-  SLIP_WORKER_COMMAND: z.string().default("python scripts/slip_worker.py")
+  SLIP_WORKER_COMMAND: z.string().default("disabled")
 });
 
 export const env = schema.parse(process.env);

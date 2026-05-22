@@ -17,7 +17,7 @@ python -m venv .venv
 .\.venv\Scripts\pip install -r requirements-slip-worker.txt
 ```
 
-For `pytesseract`, install the Tesseract OCR binary and Thai language data on the server. The worker will try `pytesseract`, `easyocr`, `pyzbar`, and OpenCV QR decoding when available.
+The production slip parser uses Node.js libraries first (`sharp`, `jsqr`, `tesseract.js`) so it can run on Vercel. The Python worker is optional for local experiments; set `SLIP_WORKER_COMMAND=python scripts/slip_worker.py` only on an environment where the Python OCR dependencies are installed.
 
 3. Copy `.env.example` to `.env` and fill LINE, LIFF, Google Sheets, and Hermes values.
 
