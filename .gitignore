@@ -1,0 +1,14 @@
+.next
+node_modules
+.env
+.env.example
+.env*.local
+dist
+coverage
+*.log
+tmp
+__pycache__
+.venv
+*.tsbuildinfo
+helfer-*.json
+service-account*.json
