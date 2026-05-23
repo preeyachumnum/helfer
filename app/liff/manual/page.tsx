@@ -1,9 +1,12 @@
 "use client";
 
 import liff from "@line/liff";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 type TxnType = "income" | "expense";
+
+const expenseCategories = ["อาหาร", "เดินทาง", "ของใช้", "บิล/ค่าสาธารณูปโภค", "สุขภาพ", "อื่น ๆ"];
+const incomeCategories = ["เงินเดือน", "รายได้เสริม", "คืนเงิน", "โบนัส", "ขายของ", "อื่น ๆ"];
 
 export default function ManualPage() {
   const [ready, setReady] = useState(false);
@@ -15,6 +18,9 @@ export default function ManualPage() {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const categories = type === "expense" ? expenseCategories : incomeCategories;
+  const previewAmount = useMemo(() => Number(amount || 0), [amount]);
 
   useEffect(() => {
     async function init() {
@@ -28,9 +34,7 @@ export default function ManualPage() {
         }
 
         const token = liff.getIDToken() ?? "";
-        if (!token) {
-          throw new Error("ไม่พบ LINE ID token กรุณาตรวจว่า LIFF scope เปิด openid แล้ว");
-        }
+        if (!token) throw new Error("ไม่พบ LINE ID token กรุณาตรวจว่า LIFF scope เปิด openid แล้ว");
 
         setIdToken(token);
         setReady(true);
@@ -41,6 +45,11 @@ export default function ManualPage() {
 
     init();
   }, []);
+
+  function changeType(nextType: TxnType) {
+    setType(nextType);
+    setCategory(nextType === "expense" ? expenseCategories[0] : incomeCategories[0]);
+  }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -76,51 +85,62 @@ export default function ManualPage() {
   }
 
   return (
-    <main className="page">
-      <section className="shell stack">
-        <div className="header">
-          <h1 className="title">กรอกจำนวนเงิน</h1>
-          <p className="subtle">บันทึกรายรับหรือรายจ่ายลงระบบ</p>
+    <main className="page entryPage">
+      <section className="shell entryShell">
+        <div className="entryHero">
+          <div>
+            <p className="eyebrow">New Transaction</p>
+            <h1 className="title">บันทึกรายการ</h1>
+            <p className="subtle">เพิ่มรายรับรายจ่ายลง Google Sheet</p>
+          </div>
+          <span className={`entryBadge ${type}`}>{type === "expense" ? "รายจ่าย" : "รายรับ"}</span>
         </div>
 
-        <form className="panel stack" onSubmit={submit}>
-          <div className="segmented">
-            <button className={`segment ${type === "expense" ? "active" : ""}`} type="button" onClick={() => setType("expense")}>
+        <form className="entryCard" onSubmit={submit}>
+          <div className="amountPanel">
+            <span>จำนวนเงิน</span>
+            <div className="amountInputRow">
+              <b>฿</b>
+              <input inputMode="decimal" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="0.00" required />
+            </div>
+            <small>{previewAmount > 0 ? formatMoney(previewAmount) : "พร้อมบันทึกรายการใหม่"}</small>
+          </div>
+
+          <div className="typeSwitch" role="group" aria-label="transaction type">
+            <button className={type === "expense" ? "active" : ""} type="button" onClick={() => changeType("expense")}>
               รายจ่าย
             </button>
-            <button className={`segment ${type === "income" ? "active" : ""}`} type="button" onClick={() => setType("income")}>
+            <button className={type === "income" ? "active" : ""} type="button" onClick={() => changeType("income")}>
               รายรับ
             </button>
           </div>
 
-          <div className="field">
-            <label>จำนวนเงิน</label>
-            <input className="input" inputMode="decimal" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="0.00" required />
-          </div>
+          <section className="formSection">
+            <div className="sectionHead">
+              <h2>หมวดหมู่</h2>
+              <span>{type === "expense" ? "Expense" : "Income"}</span>
+            </div>
+            <div className="categoryGrid">
+              {categories.map((item) => (
+                <button className={category === item ? "active" : ""} type="button" key={item} onClick={() => setCategory(item)}>
+                  {item}
+                </button>
+              ))}
+            </div>
+          </section>
 
-          <div className="field">
-            <label>หมวดหมู่</label>
-            <select className="select" value={category} onChange={(event) => setCategory(event.target.value)}>
-              <option>อาหาร</option>
-              <option>เดินทาง</option>
-              <option>ของใช้</option>
-              <option>บิล/ค่าสาธารณูปโภค</option>
-              <option>เงินเดือน</option>
-              <option>รายได้เสริม</option>
-              <option>อื่น ๆ</option>
-            </select>
-          </div>
+          <section className="formSection">
+            <label className="field">
+              <span>โน้ต</span>
+              <textarea className="textarea" value={note} onChange={(event) => setNote(event.target.value)} placeholder="เช่น ค่าอาหารกลางวัน" />
+            </label>
+          </section>
 
-          <div className="field">
-            <label>โน้ต</label>
-            <textarea className="textarea" value={note} onChange={(event) => setNote(event.target.value)} placeholder="เช่น ค่าอาหารกลางวัน" />
-          </div>
-
-          {status && <div className="status">{status}</div>}
+          {status && <div className="status success">{status}</div>}
           {error && <div className="status error">{error}</div>}
 
-          <button className="button" disabled={!ready || saving || !amount || !idToken}>
-            {saving ? "กำลังบันทึก..." : "บันทึก"}
+          <button className="button saveButton" disabled={!ready || saving || !amount || !idToken}>
+            {saving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
           </button>
         </form>
       </section>
@@ -134,4 +154,11 @@ async function safeJson(response: Response) {
   } catch {
     return null;
   }
+}
+
+function formatMoney(value: number) {
+  return new Intl.NumberFormat("th-TH", {
+    style: "currency",
+    currency: "THB"
+  }).format(value);
 }
