@@ -38,6 +38,8 @@ const categoryEmojis: Record<string, string> = {
 export default function HealthPage() {
   const [data, setData] = useState<HealthResponse | null>(null);
   const [error, setError] = useState("");
+  const [showHighlights, setShowHighlights] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
     async function init() {
@@ -161,8 +163,32 @@ export default function HealthPage() {
               )}
             </section>
 
-            <InsightPanel title="จุดที่น่าสนใจ" items={data.analysis.highlights} />
-            <InsightPanel title="คำแนะนำถัดไป" items={data.analysis.suggestions} variant="advice" />
+            {!showHighlights ? (
+              <button type="button" className="expandBtn" onClick={() => setShowHighlights(true)}>
+                <span>🔍 วิเคราะห์จุดที่น่าสนใจ</span>
+                <b>+{data.analysis.highlights.length}</b>
+              </button>
+            ) : (
+              <InsightPanel
+                title="จุดที่น่าสนใจ"
+                items={data.analysis.highlights}
+                onClose={() => setShowHighlights(false)}
+              />
+            )}
+
+            {!showSuggestions ? (
+              <button type="button" className="expandBtn" onClick={() => setShowSuggestions(true)}>
+                <span>💡 คำแนะนำทางการเงิน</span>
+                <b>+{data.analysis.suggestions.length}</b>
+              </button>
+            ) : (
+              <InsightPanel
+                title="คำแนะนำถัดไป"
+                items={data.analysis.suggestions}
+                variant="advice"
+                onClose={() => setShowSuggestions(false)}
+              />
+            )}
           </div>
         )}
       </section>
@@ -189,12 +215,28 @@ function MoneyStat({ label, value, accent }: { label: string; value: number; acc
   );
 }
 
-function InsightPanel({ title, items, variant }: { title: string; items: string[]; variant?: "advice" }) {
+function InsightPanel({
+  title,
+  items,
+  variant,
+  onClose
+}: {
+  title: string;
+  items: string[];
+  variant?: "advice";
+  onClose?: () => void;
+}) {
   return (
     <section className="panel proPanel">
       <div className="sectionHead">
         <h2>{title}</h2>
-        <span>{variant === "advice" ? "Action" : "Insight"}</span>
+        {onClose ? (
+          <button type="button" className="hideBtn" onClick={onClose}>
+            ซ่อน
+          </button>
+        ) : (
+          <span>{variant === "advice" ? "Action" : "Insight"}</span>
+        )}
       </div>
       <div className="insightList">
         {items.length === 0 ? (

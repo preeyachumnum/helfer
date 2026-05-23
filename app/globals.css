@@ -949,6 +949,58 @@ button:active {
   border-color: var(--muted);
 }
 
+.expandBtn {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.expandBtn span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.expandBtn b {
+  background: #f1f5f9;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 99px;
+}
+
+.expandBtn:active {
+  transform: scale(0.97);
+  background: #f8fafc;
+}
+
+.hideBtn {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 99px;
+  transition: all 0.2s ease;
+}
+
+.hideBtn:active {
+  background: #f1f5f9;
+  color: var(--ink);
+}
+
 /* Responsiveness overrides */
 @media (max-width: 480px) {
   .page {
