@@ -5,6 +5,8 @@ import { createId } from "@/lib/id";
 import { verifyLiffIdToken } from "@/lib/lineAuth";
 import type { TransactionRecord } from "@/lib/types";
 
+export const runtime = "nodejs";
+
 const schema = z.object({
   idToken: z.string().min(1),
   type: z.enum(["income", "expense"]),
@@ -15,25 +17,36 @@ const schema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const input = schema.parse(await request.json());
-  const { lineUserId } = await verifyLiffIdToken(input.idToken);
+  try {
+    const input = schema.parse(await request.json());
+    const { lineUserId } = await verifyLiffIdToken(input.idToken);
 
-  const record: TransactionRecord = {
-    id: createId("txn"),
-    lineUserId,
-    source: "manual",
-    type: input.type,
-    amount: input.amount,
-    currency: "THB",
-    category: input.category,
-    note: input.note,
-    transactionAt: input.transactionAt,
-    recordedAt: new Date().toISOString(),
-    confidence: 1,
-    status: "confirmed"
-  };
+    const record: TransactionRecord = {
+      id: createId("txn"),
+      lineUserId,
+      source: "manual",
+      type: input.type,
+      amount: input.amount,
+      currency: "THB",
+      category: input.category,
+      note: input.note,
+      transactionAt: input.transactionAt,
+      recordedAt: new Date().toISOString(),
+      confidence: 1,
+      status: "confirmed"
+    };
 
-  await appendTransaction(record);
+    await appendTransaction(record);
 
-  return NextResponse.json({ ok: true, record });
+    return NextResponse.json({ ok: true, record });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "manual_save_failed",
+        message: error instanceof Error ? error.message : "บันทึกรายการไม่สำเร็จ"
+      },
+      { status: 500 }
+    );
+  }
 }

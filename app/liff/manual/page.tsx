@@ -26,7 +26,13 @@ export default function ManualPage() {
           liff.login();
           return;
         }
-        setIdToken(liff.getIDToken() ?? "");
+
+        const token = liff.getIDToken() ?? "";
+        if (!token) {
+          throw new Error("ไม่พบ LINE ID token กรุณาตรวจว่า LIFF scope เปิด openid แล้ว");
+        }
+
+        setIdToken(token);
         setReady(true);
       } catch (err) {
         setError(err instanceof Error ? err.message : "เปิด LIFF ไม่สำเร็จ");
@@ -56,7 +62,8 @@ export default function ManualPage() {
         })
       });
 
-      if (!response.ok) throw new Error("บันทึกไม่สำเร็จ กรุณาลองใหม่");
+      const data = await safeJson(response);
+      if (!response.ok) throw new Error(data?.message || "บันทึกไม่สำเร็จ กรุณาลองใหม่");
 
       setAmount("");
       setNote("");
@@ -119,4 +126,12 @@ export default function ManualPage() {
       </section>
     </main>
   );
+}
+
+async function safeJson(response: Response) {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
 }
