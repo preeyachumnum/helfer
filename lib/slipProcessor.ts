@@ -47,15 +47,65 @@ async function processWithNode(imageBuffer: Buffer): Promise<SlipExtraction> {
 }
 
 async function readQr(imageBuffer: Buffer) {
-  const { data, info } = await sharp(imageBuffer)
-    .rotate()
-    .resize({ width: 1800, withoutEnlargement: true })
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
+  const variants = await buildQrVariants(imageBuffer);
 
-  const code = jsQR(new Uint8ClampedArray(data), info.width, info.height);
-  return code?.data ?? "";
+  for (const variant of variants) {
+    const code = jsQR(new Uint8ClampedArray(variant.data), variant.info.width, variant.info.height, {
+      inversionAttempts: "attemptBoth"
+    });
+    if (code?.data) {
+      return code.data;
+    }
+  }
+
+  return "";
+}
+
+async function buildQrVariants(imageBuffer: Buffer) {
+  const oriented = sharp(imageBuffer).rotate();
+  const metadata = await oriented.metadata();
+  const width = metadata.width ?? 0;
+  const height = metadata.height ?? 0;
+  const cropSize = Math.max(320, Math.floor(Math.min(width, height) * 0.42));
+  const right = Math.max(0, width - cropSize);
+  const lowerMiddle = Math.max(0, Math.floor(height * 0.48));
+  const bottom = Math.max(0, height - cropSize);
+
+  const specs: Array<{
+    width: number;
+    threshold?: number;
+    crop?: { left: number; top: number; width: number; height: number };
+  }> = [
+    { width: 2200 },
+    { width: 3200 },
+    { width: 2200, threshold: 150 },
+    { width: 3200, threshold: 150 },
+    { width: 1200, crop: { left: right, top: lowerMiddle, width: cropSize, height: Math.min(cropSize, height - lowerMiddle) } },
+    { width: 1800, crop: { left: right, top: lowerMiddle, width: cropSize, height: Math.min(cropSize, height - lowerMiddle) } },
+    { width: 1200, threshold: 150, crop: { left: right, top: lowerMiddle, width: cropSize, height: Math.min(cropSize, height - lowerMiddle) } },
+    { width: 1800, threshold: 150, crop: { left: right, top: lowerMiddle, width: cropSize, height: Math.min(cropSize, height - lowerMiddle) } },
+    { width: 1200, crop: { left: right, top: bottom, width: cropSize, height: cropSize } },
+    { width: 1200, threshold: 150, crop: { left: right, top: bottom, width: cropSize, height: cropSize } }
+  ].filter((spec) => !spec.crop || (spec.crop.width > 0 && spec.crop.height > 0 && spec.crop.left + spec.crop.width <= width && spec.crop.top + spec.crop.height <= height));
+
+  const variants = [];
+  for (const spec of specs) {
+    try {
+      let pipeline = sharp(imageBuffer).rotate();
+      if (spec.crop) {
+        pipeline = pipeline.extract(spec.crop);
+      }
+      pipeline = pipeline.resize({ width: spec.width, withoutEnlargement: false }).sharpen().normalise();
+      if (spec.threshold) {
+        pipeline = pipeline.grayscale().threshold(spec.threshold);
+      }
+      variants.push(await pipeline.ensureAlpha().raw().toBuffer({ resolveWithObject: true }));
+    } catch {
+      continue;
+    }
+  }
+
+  return variants;
 }
 
 async function processWithWorker(imageBuffer: Buffer): Promise<SlipExtraction> {

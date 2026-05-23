@@ -27,11 +27,14 @@ export async function POST(request: NextRequest) {
     const result = await withTimeout(processSlipImage(imageBuffer), 45000);
 
     if (!result.isSlip || !result.amount) {
+      const foundQr = result.reasons.some((reason) => reason.includes("QR/barcode found"));
       return NextResponse.json(
         {
           ok: false,
           error: "not_slip",
-          message: "ไม่พบ QR/Barcode ที่อ่านข้อมูลสลิปได้ กรุณาใช้เมนูกรอกเอง",
+          message: foundQr
+            ? "พบ QR/Barcode แล้ว แต่ข้อมูลใน QR ไม่พอสำหรับบันทึกยอดเงิน กรุณาใช้เมนูกรอกเอง"
+            : "ไม่พบ QR/Barcode ที่อ่านได้ กรุณาลองครอปรูปให้เห็น QR ชัดขึ้น หรือใช้เมนูกรอกเอง",
           result
         },
         { status: 422 }
