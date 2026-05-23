@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         {
           ok: false,
           error: "not_slip",
-          message: "อ่านข้อมูลสลิปไม่สำเร็จ กรุณาลองรูปสลิปที่ชัดขึ้น หรือใช้เมนูกรอกเอง",
+          message: "ไม่พบ QR/Barcode ที่อ่านข้อมูลสลิปได้ กรุณาใช้เมนูกรอกเอง",
           result
         },
         { status: 422 }

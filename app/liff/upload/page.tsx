@@ -72,7 +72,7 @@ export default function UploadPage() {
     } catch (err) {
       const message =
         err instanceof DOMException && err.name === "AbortError"
-          ? "อ่านสลิปนานเกินไป กรุณาลองรูปที่ชัดขึ้น หรือใช้เมนูกรอกเอง"
+          ? "อ่าน QR/Barcode นานเกินไป กรุณาใช้เมนูกรอกเอง"
           : err instanceof Error
             ? err.message
             : "เกิดข้อผิดพลาด";
@@ -90,7 +90,7 @@ export default function UploadPage() {
       <section className="shell stack">
         <div className="header">
           <h1 className="title">บันทึกจากสลิป</h1>
-          <p className="subtle">ระบบอ่านรูปชั่วคราวและเก็บเฉพาะข้อความ</p>
+          <p className="subtle">อ่านเฉพาะ QR/Barcode ถ้าอ่านไม่ได้ให้กรอกเอง</p>
         </div>
 
         <div className="panel stack">

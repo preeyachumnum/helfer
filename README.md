@@ -17,7 +17,7 @@ python -m venv .venv
 .\.venv\Scripts\pip install -r requirements-slip-worker.txt
 ```
 
-The production slip parser uses QR decoding first, then Google Vision OCR when `GOOGLE_VISION_OCR=enabled`. Enable the Google Cloud Vision API for the same project as the service account. The Python worker is optional for local experiments; set `SLIP_WORKER_COMMAND=python scripts/slip_worker.py` only on an environment where the Python OCR dependencies are installed.
+The production slip parser reads QR/barcode content only. If a slip has no readable QR/barcode, users should use manual entry. The Python worker is optional for local experiments; set `SLIP_WORKER_COMMAND=python scripts/slip_worker.py` only on an environment where the Python OCR dependencies are installed.
 
 3. Copy `.env.example` to `.env` and fill LINE, LIFF, Google Sheets, and Hermes values.
 

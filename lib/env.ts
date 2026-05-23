@@ -19,7 +19,6 @@ const schema = z.object({
   GOOGLE_SHEETS_SPREADSHEET_ID: optionalString,
   GOOGLE_SERVICE_ACCOUNT_EMAIL: z.preprocess(blankToUndefined, z.string().email().optional()),
   GOOGLE_PRIVATE_KEY: optionalString,
-  GOOGLE_VISION_OCR: z.preprocess(blankToUndefined, z.enum(["enabled", "disabled"]).default("enabled")),
   HERMES_ENDPOINT: optionalUrl,
   HERMES_API_KEY: optionalString,
   HERMES_CACHE_TTL_SECONDS: z.coerce.number().int().positive().default(21600),

@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
       googleSheetsSpreadsheetId: Boolean(env.GOOGLE_SHEETS_SPREADSHEET_ID),
       googleServiceAccountEmail: Boolean(env.GOOGLE_SERVICE_ACCOUNT_EMAIL),
       googlePrivateKey: Boolean(env.GOOGLE_PRIVATE_KEY),
-      googleVisionOcr: env.GOOGLE_VISION_OCR,
       hermesEndpoint: env.HERMES_ENDPOINT || "unset",
       slipWorkerCommand: env.SLIP_WORKER_COMMAND
     }
