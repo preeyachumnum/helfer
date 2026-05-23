@@ -1,33 +1,23 @@
-import { google } from "googleapis";
 import { requireEnv } from "./env";
+import { getGoogleAccessToken } from "./googleAuth";
 import type { TransactionRecord } from "./types";
 
 const TRANSACTIONS_RANGE = "transactions!A:U";
-
-function getAuth() {
-  const email = requireEnv("GOOGLE_SERVICE_ACCOUNT_EMAIL");
-  const key = requireEnv("GOOGLE_PRIVATE_KEY").replace(/\\n/g, "\n");
-
-  return new google.auth.JWT({
-    email,
-    key,
-    scopes: ["https://www.googleapis.com/auth/spreadsheets"]
-  });
-}
-
-function getSheets() {
-  return google.sheets({ version: "v4", auth: getAuth() });
-}
+const SHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets";
 
 export async function appendTransaction(record: TransactionRecord) {
-  const sheets = getSheets();
   const spreadsheetId = requireEnv("GOOGLE_SHEETS_SPREADSHEET_ID");
+  const accessToken = await getGoogleAccessToken([SHEETS_SCOPE]);
+  const url = new URL(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(TRANSACTIONS_RANGE)}:append`);
+  url.searchParams.set("valueInputOption", "USER_ENTERED");
 
-  await sheets.spreadsheets.values.append({
-    spreadsheetId,
-    range: TRANSACTIONS_RANGE,
-    valueInputOption: "USER_ENTERED",
-    requestBody: {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
       values: [[
         record.id,
         record.lineUserId,
@@ -46,19 +36,30 @@ export async function appendTransaction(record: TransactionRecord) {
         record.confidence ?? "",
         record.status
       ]]
-    }
+    })
   });
+
+  if (!response.ok) {
+    throw new Error(`Google Sheets append failed: ${response.status} ${(await response.text()).slice(0, 180)}`);
+  }
 }
 
 export async function listTransactionsForUser(lineUserId: string, periodDays = 30) {
-  const sheets = getSheets();
   const spreadsheetId = requireEnv("GOOGLE_SHEETS_SPREADSHEET_ID");
-  const response = await sheets.spreadsheets.values.get({
-    spreadsheetId,
-    range: TRANSACTIONS_RANGE
-  });
+  const accessToken = await getGoogleAccessToken([SHEETS_SCOPE]);
+  const response = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(TRANSACTIONS_RANGE)}`,
+    {
+      headers: { authorization: `Bearer ${accessToken}` }
+    }
+  );
 
-  const rows = response.data.values ?? [];
+  if (!response.ok) {
+    throw new Error(`Google Sheets read failed: ${response.status} ${(await response.text()).slice(0, 180)}`);
+  }
+
+  const data = (await response.json()) as { values?: unknown[][] };
+  const rows = data.values ?? [];
   const cutoff = Date.now() - periodDays * 24 * 60 * 60 * 1000;
 
   return rows

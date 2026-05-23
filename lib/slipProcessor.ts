@@ -4,10 +4,9 @@ import { tmpdir } from "os";
 import path from "path";
 import jsQR from "jsqr";
 import sharp from "sharp";
-import { createWorker } from "tesseract.js";
 import { promisify } from "util";
-import { google } from "googleapis";
 import { env } from "./env";
+import { getGoogleAccessToken } from "./googleAuth";
 import type { SlipExtraction, TransactionType } from "./types";
 
 const execFileAsync = promisify(execFile);
@@ -46,8 +45,7 @@ async function processWithNode(imageBuffer: Buffer): Promise<SlipExtraction> {
       return qrResult;
     }
 
-    const ocrText = await readTextWithTesseract(imageBuffer);
-    return extractSlip([ocrText, qrText].filter(Boolean).join("\n"));
+    return qrResult;
   } catch (error) {
     return emptyResult(error instanceof Error ? error.message : "Node slip processor failed");
   }
@@ -70,17 +68,12 @@ async function readTextWithGoogleVision(imageBuffer: Buffer) {
     throw new Error("Google Vision OCR is enabled but Google service account credentials are missing");
   }
 
-  const auth = new google.auth.JWT({
-    email: env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    key: env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-    scopes: ["https://www.googleapis.com/auth/cloud-platform"]
-  });
-  const token = await auth.getAccessToken();
+  const token = await getGoogleAccessToken(["https://www.googleapis.com/auth/cloud-platform"]);
 
   const response = await fetch("https://vision.googleapis.com/v1/images:annotate", {
     method: "POST",
     headers: {
-      authorization: `Bearer ${token.token}`,
+      authorization: `Bearer ${token}`,
       "content-type": "application/json"
     },
     body: JSON.stringify({
@@ -108,24 +101,6 @@ async function readTextWithGoogleVision(imageBuffer: Buffer) {
   }
 
   return first?.fullTextAnnotation?.text ?? "";
-}
-
-async function readTextWithTesseract(imageBuffer: Buffer) {
-  const png = await sharp(imageBuffer)
-    .rotate()
-    .resize({ width: 1800, withoutEnlargement: true })
-    .grayscale()
-    .normalise()
-    .png()
-    .toBuffer();
-
-  const worker = await createWorker("eng");
-  try {
-    const result = await worker.recognize(png);
-    return result.data.text;
-  } finally {
-    await worker.terminate();
-  }
 }
 
 async function processWithWorker(imageBuffer: Buffer): Promise<SlipExtraction> {
