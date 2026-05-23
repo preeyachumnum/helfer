@@ -909,6 +909,46 @@ button:active {
   box-shadow: none !important;
 }
 
+.amountPresets {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.amountPresets button {
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 6px 16px;
+  background: #fff;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+.amountPresets button:active {
+  transform: scale(0.95);
+  background: #f1f5f9;
+}
+
+.addNoteBtn {
+  width: 100%;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.addNoteBtn:hover {
+  background: #fff;
+  border-color: var(--muted);
+}
+
 /* Responsiveness overrides */
 @media (max-width: 480px) {
   .page {

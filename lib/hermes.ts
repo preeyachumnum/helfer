@@ -75,17 +75,17 @@ function fallbackAnalysis(summary: FinanceSummary): HermesAnalysis {
   return {
     summary:
       summary.transactionCount === 0
-        ? "ยังไม่มีข้อมูลธุรกรรมเพียงพอสำหรับวิเคราะห์สุขภาพเงิน"
-        : `ช่วง ${summary.periodDays} วันล่าสุด คงเหลือสุทธิ ${formatMoney(summary.balance)} และอัตราเหลือเก็บประมาณ ${savingRate}%`,
+        ? "ยังไม่มีข้อมูลเพียงพอสำหรับวิเคราะห์"
+        : `คงเหลือสุทธิ ${formatMoney(summary.balance)} (ออมได้ ${savingRate}%)`,
     score: Math.max(0, Math.min(100, 55 + savingRate)),
     highlights: [
-      `รายรับรวม ${formatMoney(summary.income)}`,
-      `รายจ่ายรวม ${formatMoney(summary.expense)}`,
-      topCategory ? `หมวดที่ใช้มากที่สุดคือ ${topCategory.category} (${formatMoney(topCategory.amount)})` : `จำนวนรายการ ${summary.transactionCount} รายการ`
+      `รายรับ: ${formatMoney(summary.income)}`,
+      `รายจ่าย: ${formatMoney(summary.expense)}`,
+      topCategory ? `จ่ายหลัก: ${topCategory.category} (${formatMoney(topCategory.amount)})` : `รายการ: ${summary.transactionCount} รายการ`
     ],
     suggestions: balancePositive
-      ? ["รักษาระดับรายจ่ายให้อยู่ต่ำกว่ารายรับ", "กันเงินสำรองทันทีหลังมีรายรับเพื่อให้ยอดคงเหลือไม่ไหลออก"]
-      : ["รายจ่ายสูงกว่ารายรับ ควรเริ่มจากลดหมวดที่ใช้มากที่สุด", "ตั้งเพดานใช้จ่ายรายสัปดาห์และตรวจยอดคงเหลือทุก 2-3 วัน"]
+      ? ["รักษาระดับรายจ่าย", "หักออมทันทีเมื่อรายได้เข้า"]
+      : ["เริ่มลดรายจ่ายหมวดหลัก", "ตั้งเพดานการใช้จ่ายรายสัปดาห์"]
   };
 }
 

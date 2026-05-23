@@ -1,7 +1,7 @@
 "use client";
 
 import liff from "@line/liff";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState, useRef } from "react";
 
 type TxnType = "income" | "expense";
 
@@ -34,8 +34,12 @@ export default function ManualPage() {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [showNote, setShowNote] = useState(false);
 
-  const amountNumber = useMemo(() => Number(amount || 0), [amount]);
+  const amountInputRef = useRef<HTMLInputElement>(null);
+
+  const presets = [50, 100, 500, 1000];
+
   const today = useMemo(
     () =>
       new Intl.DateTimeFormat("th-TH", {
@@ -70,9 +74,15 @@ export default function ManualPage() {
     init();
   }, []);
 
-  function selectType(nextType: TxnType) {
+  useEffect(() => {
+    if (ready) {
+      amountInputRef.current?.focus();
+    }
+  }, [ready]);
+
+  function selectCategory(nextType: TxnType, nextCategory: string) {
     setType(nextType);
-    setCategory(categories[nextType][0]);
+    setCategory(nextCategory);
     setStatus("");
     setError("");
   }
@@ -122,34 +132,41 @@ export default function ManualPage() {
         </header>
 
         <form className="entryV2Form" onSubmit={submit}>
-          <section className="typeCards" aria-label="ประเภท">
-            <button type="button" className={type === "expense" ? "active expense" : "expense"} onClick={() => selectType("expense")}>
-              <span>รายจ่าย</span>
-              <strong>เงินออก</strong>
-            </button>
-            <button type="button" className={type === "income" ? "active income" : "income"} onClick={() => selectType("income")}>
-              <span>รายรับ</span>
-              <strong>เงินเข้า</strong>
-            </button>
-          </section>
-
           <section className="entryBlock amountBlock">
-            <label htmlFor="amount">จำนวนเงิน</label>
             <div className="amountField">
-              <input id="amount" inputMode="decimal" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="0.00" required />
+              <input
+                ref={amountInputRef}
+                id="amount"
+                inputMode="decimal"
+                value={amount}
+                onChange={(event) => setAmount(event.target.value)}
+                placeholder="0.00"
+                required
+              />
               <span>THB</span>
             </div>
-            <p>{amountNumber > 0 ? formatMoney(amountNumber) : "ระบุจำนวนเงินที่ต้องการบันทึก"}</p>
+            <div className="amountPresets">
+              {presets.map((p) => (
+                <button type="button" key={p} onClick={() => setAmount(String(p))}>
+                  {p}
+                </button>
+              ))}
+            </div>
           </section>
 
           <section className="entryBlock">
             <div className="blockHead">
-              <label>หมวดหมู่</label>
-              <span>{type === "expense" ? "Expense" : "Income"}</span>
+              <label>💸 รายจ่าย</label>
+              <span>Expense</span>
             </div>
             <div className="categoryPills">
-              {categories[type].map((item) => (
-                <button type="button" className={category === item ? "active" : ""} key={item} onClick={() => setCategory(item)}>
+              {categories.expense.map((item) => (
+                <button
+                  type="button"
+                  className={type === "expense" && category === item ? "active" : ""}
+                  key={item}
+                  onClick={() => selectCategory("expense", item)}
+                >
                   <span>{categoryEmojis[item] || "✨"}</span> {item}
                 </button>
               ))}
@@ -157,16 +174,34 @@ export default function ManualPage() {
           </section>
 
           <section className="entryBlock">
-            <label htmlFor="note">รายละเอียด</label>
-            <textarea id="note" value={note} onChange={(event) => setNote(event.target.value)} placeholder="เช่น ค่าอาหารกลางวัน" />
+            <div className="blockHead">
+              <label>💰 รายรับ</label>
+              <span>Income</span>
+            </div>
+            <div className="categoryPills">
+              {categories.income.map((item) => (
+                <button
+                  type="button"
+                  className={type === "income" && category === item ? "active" : ""}
+                  key={item}
+                  onClick={() => selectCategory("income", item)}
+                >
+                  <span>{categoryEmojis[item] || "✨"}</span> {item}
+                </button>
+              ))}
+            </div>
           </section>
 
-          <section className="reviewStrip">
-            <span>กำลังบันทึกเป็น</span>
-            <strong>
-              {type === "expense" ? "รายจ่าย" : "รายรับ"} · {category}
-            </strong>
-          </section>
+          {!showNote ? (
+            <button type="button" className="addNoteBtn" onClick={() => setShowNote(true)}>
+              + เพิ่มบันทึก (โน้ต)
+            </button>
+          ) : (
+            <section className="entryBlock">
+              <label htmlFor="note">รายละเอียด</label>
+              <textarea id="note" value={note} onChange={(event) => setNote(event.target.value)} placeholder="เช่น ค่าอาหารกลางวัน" />
+            </section>
+          )}
 
           {status && <div className="status success">{status}</div>}
           {error && <div className="status error">{error}</div>}
