@@ -685,6 +685,266 @@ textarea {
   color: var(--rose);
 }
 
+.entryV2 {
+  background: #f6f7f6;
+  padding: 0;
+}
+
+.entryV2Shell {
+  width: min(430px, 100%);
+  min-height: 100svh;
+  margin: 0 auto;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: #f6f7f6;
+}
+
+.entryV2Header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 16px 10px;
+}
+
+.entryV2Header span {
+  display: block;
+  color: #6f7b73;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.entryV2Header h1 {
+  margin: 3px 0 0;
+  color: #16251c;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.entryV2Header time {
+  flex: 0 0 auto;
+  border: 1px solid #dfe5e1;
+  border-radius: 6px;
+  padding: 7px 9px;
+  background: #fff;
+  color: #4b5a51;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.entryV2Form {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 0 12px 14px;
+}
+
+.typeCards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.typeCards button {
+  border: 1px solid #dfe5e1;
+  border-radius: 8px;
+  padding: 11px 12px;
+  background: #fff;
+  color: #5d6b62;
+  text-align: left;
+}
+
+.typeCards button span {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.typeCards button strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.typeCards button.active.expense {
+  border-color: rgba(180, 35, 58, 0.42);
+  background: #fff;
+  color: var(--rose);
+  box-shadow: inset 0 -3px 0 var(--rose);
+}
+
+.typeCards button.active.income {
+  border-color: rgba(21, 130, 65, 0.42);
+  background: #fff;
+  color: var(--primary-dark);
+  box-shadow: inset 0 -3px 0 var(--primary-dark);
+}
+
+.entryBlock {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #dfe5e1;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+}
+
+.entryBlock label,
+.blockHead label {
+  color: #4b5a51;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.blockHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.blockHead span {
+  color: #7a857d;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.amountBlock {
+  padding: 13px 12px 10px;
+}
+
+.amountField {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+  border-bottom: 1px solid #e7ece8;
+  padding-bottom: 8px;
+}
+
+.amountField input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #111d16;
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.amountField input::placeholder {
+  color: #aeb8b1;
+}
+
+.amountField span {
+  color: #6f7b73;
+  font-size: 12px;
+  font-weight: 900;
+  padding-bottom: 4px;
+}
+
+.entryV2.expense .amountField input {
+  color: var(--rose);
+}
+
+.entryV2.income .amountField input {
+  color: var(--primary-dark);
+}
+
+.amountBlock p {
+  margin: 0;
+  color: #6f7b73;
+  font-size: 12px;
+}
+
+.categoryPills {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.categoryPills button {
+  min-height: 40px;
+  border: 1px solid #e0e6e2;
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: #fbfcfb;
+  color: #233127;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: left;
+}
+
+.entryV2.expense .categoryPills button.active {
+  border-color: rgba(180, 35, 58, 0.36);
+  background: #fff4f6;
+  color: var(--rose);
+}
+
+.entryV2.income .categoryPills button.active {
+  border-color: rgba(21, 130, 65, 0.36);
+  background: #f1faf5;
+  color: var(--primary-dark);
+}
+
+.entryBlock textarea {
+  width: 100%;
+  min-height: 72px;
+  border: 1px solid #e0e6e2;
+  border-radius: 6px;
+  padding: 10px;
+  background: #fbfcfb;
+  color: #16251c;
+  resize: vertical;
+}
+
+.reviewStrip {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid #dfe5e1;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.reviewStrip span {
+  color: #6f7b73;
+  font-size: 12px;
+}
+
+.reviewStrip strong {
+  color: #16251c;
+  font-size: 13px;
+}
+
+.entrySubmit {
+  min-height: 48px;
+  border: 0;
+  border-radius: 8px;
+  background: #16251c;
+  color: #fff;
+  font-weight: 900;
+}
+
+.entryV2.expense .entrySubmit {
+  background: var(--rose);
+}
+
+.entryV2.income .entrySubmit {
+  background: var(--primary-dark);
+}
+
+.entrySubmit:disabled {
+  opacity: 0.48;
+}
+
 @media (max-width: 480px) {
   .page {
     padding: 14px;
