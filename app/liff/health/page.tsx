@@ -21,6 +21,20 @@ type HealthResponse = {
   };
 };
 
+const categoryEmojis: Record<string, string> = {
+  "อาหาร": "🍔",
+  "เดินทาง": "🚗",
+  "ของใช้": "🧺",
+  "บิล": "🧾",
+  "สุขภาพ": "💊",
+  "อื่น ๆ": "✨",
+  "เงินเดือน": "💼",
+  "รายได้เสริม": "📈",
+  "คืนเงิน": "🔄",
+  "โบนัส": "🎁",
+  "ขายของ": "🛒"
+};
+
 export default function HealthPage() {
   const [data, setData] = useState<HealthResponse | null>(null);
   const [error, setError] = useState("");
@@ -135,7 +149,7 @@ export default function HealthPage() {
                   {data.summary.topCategories.map((item) => (
                     <div className="barItem" key={item.category}>
                       <div>
-                        <span>{item.category}</span>
+                        <span>{categoryEmojis[item.category] || "✨"} {item.category}</span>
                         <strong>{formatMoney(item.amount)}</strong>
                       </div>
                       <div className="barTrack">

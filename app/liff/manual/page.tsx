@@ -10,6 +10,20 @@ const categories: Record<TxnType, string[]> = {
   income: ["เงินเดือน", "รายได้เสริม", "คืนเงิน", "โบนัส", "ขายของ", "อื่น ๆ"]
 };
 
+const categoryEmojis: Record<string, string> = {
+  "อาหาร": "🍔",
+  "เดินทาง": "🚗",
+  "ของใช้": "🧺",
+  "บิล": "🧾",
+  "สุขภาพ": "💊",
+  "อื่น ๆ": "✨",
+  "เงินเดือน": "💼",
+  "รายได้เสริม": "📈",
+  "คืนเงิน": "🔄",
+  "โบนัส": "🎁",
+  "ขายของ": "🛒"
+};
+
 export default function ManualPage() {
   const [ready, setReady] = useState(false);
   const [idToken, setIdToken] = useState("");
@@ -136,7 +150,7 @@ export default function ManualPage() {
             <div className="categoryPills">
               {categories[type].map((item) => (
                 <button type="button" className={category === item ? "active" : ""} key={item} onClick={() => setCategory(item)}>
-                  {item}
+                  <span>{categoryEmojis[item] || "✨"}</span> {item}
                 </button>
               ))}
             </div>
