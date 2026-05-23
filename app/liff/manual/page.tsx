@@ -85,7 +85,7 @@ export default function ManualPage() {
   }
 
   return (
-    <main className="page entryPage">
+    <main className={`page entryPage ${type}`}>
       <section className="shell entryShell">
         <div className="entryHero">
           <div>

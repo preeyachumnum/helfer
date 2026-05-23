@@ -526,8 +526,9 @@ textarea {
 }
 
 .entryBadge.expense {
-  border-color: rgba(196, 123, 0, 0.28);
-  color: var(--amber);
+  border-color: rgba(194, 65, 90, 0.28);
+  color: var(--rose);
+  background: rgba(255, 255, 255, 0.78);
 }
 
 .entryCard {
@@ -551,6 +552,13 @@ textarea {
     #fbfdfb;
 }
 
+.entryPage.expense .amountPanel {
+  border-color: rgba(194, 65, 90, 0.18);
+  background:
+    linear-gradient(135deg, rgba(194, 65, 90, 0.1), rgba(255, 255, 255, 0.82)),
+    #fffafa;
+}
+
 .amountPanel > span {
   color: var(--muted);
   font-size: 12px;
@@ -571,6 +579,10 @@ textarea {
 .amountInputRow b {
   color: var(--primary-dark);
   font-size: 24px;
+}
+
+.entryPage.expense .amountInputRow b {
+  color: var(--rose);
 }
 
 .amountInputRow input {
@@ -614,6 +626,10 @@ textarea {
   box-shadow: 0 6px 14px rgba(24, 43, 32, 0.08);
 }
 
+.entryPage.expense .typeSwitch button.active {
+  color: var(--rose);
+}
+
 .formSection {
   display: grid;
   gap: 10px;
@@ -642,9 +658,25 @@ textarea {
   color: var(--primary-dark);
 }
 
+.entryPage.expense .categoryGrid button.active {
+  border-color: rgba(194, 65, 90, 0.42);
+  background: #fff0f3;
+  color: var(--rose);
+}
+
 .saveButton {
   min-height: 46px;
   box-shadow: 0 10px 20px rgba(33, 177, 90, 0.2);
+}
+
+.entryPage.expense .saveButton {
+  background: var(--rose);
+  box-shadow: 0 10px 20px rgba(194, 65, 90, 0.18);
+}
+
+.entryPage.expense .status.success {
+  background: #fff0f3;
+  color: var(--rose);
 }
 
 @media (max-width: 480px) {
