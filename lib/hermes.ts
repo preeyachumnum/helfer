@@ -69,22 +69,23 @@ export async function analyzeWithHermes(
 
 function fallbackAnalysis(summary: FinanceSummary): HermesAnalysis {
   const savingRate = summary.income > 0 ? Math.round(((summary.income - summary.expense) / summary.income) * 100) : 0;
+  const balancePositive = summary.balance >= 0;
+  const topCategory = summary.topCategories[0];
 
   return {
     summary:
       summary.transactionCount === 0
         ? "ยังไม่มีข้อมูลธุรกรรมเพียงพอสำหรับวิเคราะห์สุขภาพเงิน"
-        : `ช่วง ${summary.periodDays} วันล่าสุด มียอดคงเหลือสุทธิ ${formatMoney(summary.balance)} และอัตราเหลือเก็บประมาณ ${savingRate}%`,
-    score: Math.max(0, Math.min(100, 50 + savingRate)),
+        : `ช่วง ${summary.periodDays} วันล่าสุด คงเหลือสุทธิ ${formatMoney(summary.balance)} และอัตราเหลือเก็บประมาณ ${savingRate}%`,
+    score: Math.max(0, Math.min(100, 55 + savingRate)),
     highlights: [
       `รายรับรวม ${formatMoney(summary.income)}`,
       `รายจ่ายรวม ${formatMoney(summary.expense)}`,
-      `จำนวนรายการ ${summary.transactionCount} รายการ`
+      topCategory ? `หมวดที่ใช้มากที่สุดคือ ${topCategory.category} (${formatMoney(topCategory.amount)})` : `จำนวนรายการ ${summary.transactionCount} รายการ`
     ],
-    suggestions:
-      summary.expense > summary.income
-        ? ["รายจ่ายสูงกว่ารายรับ ควรตรวจหมวดที่ใช้จ่ายมากที่สุดก่อน", "ตั้งเพดานใช้จ่ายรายสัปดาห์เพื่อคุมเงินสดออก"]
-        : ["รักษายอดใช้จ่ายให้อยู่ในระดับปัจจุบัน", "แยกเงินออมหรือเงินสำรองทันทีหลังมีรายรับ"]
+    suggestions: balancePositive
+      ? ["รักษาระดับรายจ่ายให้อยู่ต่ำกว่ารายรับ", "กันเงินสำรองทันทีหลังมีรายรับเพื่อให้ยอดคงเหลือไม่ไหลออก"]
+      : ["รายจ่ายสูงกว่ารายรับ ควรเริ่มจากลดหมวดที่ใช้มากที่สุด", "ตั้งเพดานใช้จ่ายรายสัปดาห์และตรวจยอดคงเหลือทุก 2-3 วัน"]
   };
 }
 
