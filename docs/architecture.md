@@ -3,16 +3,13 @@
 ## Runtime
 
 - Next.js/TypeScript is the main app, LIFF frontend, LINE webhook, Google Sheets writer, and Hermes gateway.
-- Python is the slip worker for QR/OCR parsing without AI image reading.
-- Images are read into memory or a temporary OS file only. The temp folder is removed after parsing.
+- Slip upload automation is intentionally disabled for this MVP. Users enter transactions manually.
 
 ## Routes
 
-- `/liff/upload` opens a LIFF upload screen.
 - `/liff/manual` opens the manual transaction form.
 - `/liff/health` opens the financial health dashboard.
 - `/api/line/webhook` receives LINE webhook events and image messages.
-- `/api/slips/upload` receives LIFF image uploads.
 - `/api/transactions/manual` saves manual records.
 - `/api/health/analyze` reads user transactions and calls Hermes only after validation.
 
@@ -30,7 +27,6 @@ Share the spreadsheet with the service account email in `GOOGLE_SERVICE_ACCOUNT_
 
 Recommended actions:
 
-- Slip upload: URI action to `https://liff.line.me/{NEXT_PUBLIC_LIFF_ID}/upload`
 - Manual entry: URI action to `https://liff.line.me/{NEXT_PUBLIC_LIFF_ID}/manual`
 - Financial health: URI action to `https://liff.line.me/{NEXT_PUBLIC_LIFF_ID}/health`
 
@@ -40,7 +36,7 @@ Create only one LIFF app in LINE Developers. Point its endpoint URL to your depl
 https://helfer-brown.vercel.app/liff
 ```
 
-LINE native image upload is also supported: users can send an image directly in chat and `/api/line/webhook` will process it.
+LINE native image upload is disabled for this MVP. If users send an image, the bot asks them to use manual entry.
 
 ## Hermes Gateway
 

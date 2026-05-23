@@ -1,6 +1,6 @@
 # Helfer
 
-LINE OA + LIFF finance helper for slip uploads, manual transaction entry, Google Sheets storage, and guarded Hermes financial analysis.
+LINE OA + LIFF finance helper for manual transaction entry, Google Sheets storage, and guarded Hermes financial analysis.
 
 ## Setup
 
@@ -10,20 +10,11 @@ LINE OA + LIFF finance helper for slip uploads, manual transaction entry, Google
 npm install
 ```
 
-2. Optional slip worker dependencies:
+2. Copy `.env.template` to `.env` and fill LINE, LIFF, Google Sheets, and Hermes values.
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\pip install -r requirements-slip-worker.txt
-```
+The app creates the `transactions` sheet tab and header automatically on first write.
 
-The production slip parser reads QR/barcode content only. If a slip has no readable QR/barcode, users should use manual entry. The Python worker is optional for local experiments; set `SLIP_WORKER_COMMAND=python scripts/slip_worker.py` only on an environment where the Python OCR dependencies are installed.
-
-3. Copy `.env.example` to `.env` and fill LINE, LIFF, Google Sheets, and Hermes values.
-
-4. Create a Google Sheet tab named `transactions` with the header in `docs/architecture.md`.
-
-5. Start development:
+3. Start development:
 
 ```powershell
 npm run dev
@@ -31,13 +22,11 @@ npm run dev
 
 ## Main URLs
 
-- `http://localhost:3000/liff/upload`
 - `http://localhost:3000/liff/manual`
 - `http://localhost:3000/liff/health`
 - `http://localhost:3000/api/line/webhook`
 
 ## Notes
 
-- Uploaded slip images are not persisted. They are processed as a temporary file and deleted in `lib/slipProcessor.ts`.
 - Hermes is only called through the server-side gateway in `lib/hermes.ts`.
 - If `HERMES_ENDPOINT` is not configured, the app returns a local rule-based financial summary.
