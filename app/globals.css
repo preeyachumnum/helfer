@@ -7,11 +7,12 @@
   --line: #dce7dd;
   --primary: #21b15a;
   --primary-dark: #158241;
-  --danger: #c43b3b;
+  --danger: #b4233a;
   --warning: #a76a00;
   --teal: #0f766e;
   --amber: #c47b00;
-  --rose: #c2415a;
+  --rose: #b4233a;
+  --surface: #f9fbfa;
 }
 
 * {
@@ -497,9 +498,7 @@ textarea {
 }
 
 .entryPage {
-  background:
-    linear-gradient(180deg, #e8f5ee 0, rgba(232, 245, 238, 0) 260px),
-    var(--bg);
+  background: #f6f8f7;
 }
 
 .entryShell {
@@ -512,57 +511,54 @@ textarea {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding: 8px 2px 0;
+  padding: 6px 0 0;
 }
 
 .entryBadge {
-  border: 1px solid rgba(33, 177, 90, 0.24);
-  border-radius: 999px;
-  padding: 7px 10px;
-  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(21, 130, 65, 0.22);
+  border-radius: 6px;
+  padding: 6px 9px;
+  background: #ffffff;
   color: var(--primary-dark);
   font-size: 12px;
   font-weight: 800;
 }
 
 .entryBadge.expense {
-  border-color: rgba(194, 65, 90, 0.28);
+  border-color: rgba(180, 35, 58, 0.22);
   color: var(--rose);
-  background: rgba(255, 255, 255, 0.78);
+  background: #fff;
 }
 
 .entryCard {
   display: grid;
-  gap: 12px;
-  border: 1px solid rgba(16, 37, 26, 0.08);
+  gap: 14px;
+  border: 1px solid #dfe8e2;
   border-radius: 8px;
-  padding: 12px;
+  padding: 14px;
   background: #fff;
-  box-shadow: 0 14px 30px rgba(18, 58, 36, 0.08);
+  box-shadow: none;
 }
 
 .amountPanel {
   display: grid;
-  gap: 7px;
-  border: 1px solid #e1ece4;
+  gap: 8px;
+  border: 1px solid #dfe8e2;
   border-radius: 8px;
-  padding: 14px;
-  background:
-    linear-gradient(135deg, rgba(33, 177, 90, 0.1), rgba(255, 255, 255, 0.8)),
-    #fbfdfb;
+  padding: 14px 14px 12px;
+  background: var(--surface);
 }
 
 .entryPage.expense .amountPanel {
-  border-color: rgba(194, 65, 90, 0.18);
-  background:
-    linear-gradient(135deg, rgba(194, 65, 90, 0.1), rgba(255, 255, 255, 0.82)),
-    #fffafa;
+  border-color: rgba(180, 35, 58, 0.2);
+  background: #fff9fa;
 }
 
 .amountPanel > span {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
+  color: #6b786f;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .amountPanel small {
@@ -578,7 +574,7 @@ textarea {
 
 .amountInputRow b {
   color: var(--primary-dark);
-  font-size: 24px;
+  font-size: 21px;
 }
 
 .entryPage.expense .amountInputRow b {
@@ -592,7 +588,7 @@ textarea {
   outline: 0;
   background: transparent;
   color: var(--ink);
-  font-size: 34px;
+  font-size: 38px;
   font-weight: 800;
   line-height: 1.1;
 }
@@ -604,74 +600,84 @@ textarea {
 .typeSwitch {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  gap: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 5px;
-  background: #f7faf8;
+  padding: 0;
+  background: #fff;
+  overflow: hidden;
 }
 
 .typeSwitch button {
   border: 0;
-  border-radius: 7px;
-  padding: 10px;
+  border-radius: 0;
+  padding: 12px 10px;
   background: transparent;
   color: var(--muted);
   font-weight: 800;
 }
 
+.typeSwitch button + button {
+  border-left: 1px solid var(--line);
+}
+
 .typeSwitch button.active {
-  background: #fff;
+  background: #eef8f2;
   color: var(--primary-dark);
-  box-shadow: 0 6px 14px rgba(24, 43, 32, 0.08);
+  box-shadow: inset 0 -2px 0 var(--primary);
 }
 
 .entryPage.expense .typeSwitch button.active {
+  background: #fff1f3;
   color: var(--rose);
+  box-shadow: inset 0 -2px 0 var(--rose);
 }
 
 .formSection {
   display: grid;
   gap: 10px;
+  border-top: 1px solid #edf2ee;
+  padding-top: 12px;
 }
 
 .categoryGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
 }
 
 .categoryGrid button {
-  min-height: 44px;
+  min-height: 42px;
   border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 8px;
+  border-radius: 6px;
+  padding: 8px 10px;
   background: #fff;
   color: var(--ink);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
+  text-align: left;
 }
 
 .categoryGrid button.active {
-  border-color: rgba(33, 177, 90, 0.55);
-  background: #eaf8ef;
+  border-color: rgba(21, 130, 65, 0.34);
+  background: #f0faf4;
   color: var(--primary-dark);
 }
 
 .entryPage.expense .categoryGrid button.active {
-  border-color: rgba(194, 65, 90, 0.42);
-  background: #fff0f3;
+  border-color: rgba(180, 35, 58, 0.34);
+  background: #fff4f6;
   color: var(--rose);
 }
 
 .saveButton {
   min-height: 46px;
-  box-shadow: 0 10px 20px rgba(33, 177, 90, 0.2);
+  box-shadow: none;
 }
 
 .entryPage.expense .saveButton {
   background: var(--rose);
-  box-shadow: 0 10px 20px rgba(194, 65, 90, 0.18);
+  box-shadow: none;
 }
 
 .entryPage.expense .status.success {
