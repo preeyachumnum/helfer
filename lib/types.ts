@@ -33,6 +33,7 @@ export type SlipExtraction = {
   rawText: string;
   confidence: number;
   reasons: string[];
+  provider?: "ocrspace" | "fallback" | "manual";
 };
 
 export type FinanceSummary = {

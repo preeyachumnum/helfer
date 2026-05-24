@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-const allowedPages = new Set(["manual", "health"]);
+const allowedPages = new Set(["manual", "upload", "health"]);
 
 export default async function LiffPage({
   searchParams
