@@ -118,7 +118,7 @@ export default function UploadPage() {
 
         <section className="panel stack">
           <label className="uploadDrop">
-            <input type="file" accept="image/*" capture="environment" disabled={!ready || loading} onChange={onImageChange} />
+              <input type="file" accept="image/*" disabled={!ready || loading} onChange={onImageChange} />
             <strong>{loading ? "กำลังอ่านสลิป..." : "เลือกรูป / ถ่ายรูปสลิป"}</strong>
             <span>รูปจะถูกย่อขนาดในเครื่องก่อนส่ง เพื่อให้เร็วและประหยัดข้อมูล</span>
           </label>

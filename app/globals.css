@@ -1066,8 +1066,10 @@ button:active {
 
 .slipShortcut {
   display: block;
+  width: 100%;
   margin: 0 0 14px;
   padding: 14px 16px;
+  border: 0;
   border-radius: var(--radius-md);
   background: linear-gradient(135deg, #0ea5e9, #0284c7);
   color: #fff;
@@ -1075,4 +1077,13 @@ button:active {
   text-align: center;
   text-decoration: none;
   box-shadow: 0 4px 10px rgba(14, 165, 233, 0.18);
+}
+
+.slipShortcut:disabled {
+  opacity: 0.55;
+  box-shadow: none;
+}
+
+.hiddenFileInput {
+  display: none;
 }

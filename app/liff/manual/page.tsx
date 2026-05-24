@@ -1,7 +1,7 @@
 "use client";
 
 import liff from "@line/liff";
-import { FormEvent, useEffect, useMemo, useState, useRef } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState, useRef } from "react";
 
 type TxnType = "income" | "expense";
 
@@ -34,9 +34,11 @@ export default function ManualPage() {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [slipReading, setSlipReading] = useState(false);
   const [showNote, setShowNote] = useState(false);
 
   const amountInputRef = useRef<HTMLInputElement>(null);
+  const slipInputRef = useRef<HTMLInputElement>(null);
 
   const presets = [50, 100, 500, 1000];
 
@@ -87,6 +89,48 @@ export default function ManualPage() {
     setError("");
   }
 
+  async function readSlip(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setSlipReading(true);
+    setError("");
+    setStatus("");
+
+    try {
+      const compressed = await compressImage(file);
+      const formData = new FormData();
+      formData.set("idToken", idToken);
+      formData.set("image", compressed, compressed.name);
+
+      const response = await fetch("/api/slips/upload", { method: "POST", body: formData });
+      const data = await safeJson(response);
+      if (!response.ok) throw new Error(data?.message || "อ่านสลิปไม่สำเร็จ");
+
+      const extraction = data.extraction;
+      if (extraction?.amount) setAmount(String(extraction.amount));
+      if (extraction?.type === "income") {
+        setType("income");
+        setCategory("เงินเข้า");
+      } else {
+        setType("expense");
+        setCategory("สลิปโอนเงิน");
+      }
+      if (extraction?.merchantOrCounterparty || extraction?.note) {
+        setNote([extraction.merchantOrCounterparty, extraction.note]
+          .filter((item) => item && item !== "-")
+          .join(" - "));
+        setShowNote(true);
+      }
+      setStatus("อ่านสลิปแล้ว ตรวจข้อมูลแล้วกดบันทึกได้เลย");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "อ่านสลิปไม่สำเร็จ");
+    } finally {
+      setSlipReading(false);
+      event.target.value = "";
+    }
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault();
     setSaving(true);
@@ -131,9 +175,21 @@ export default function ManualPage() {
           <time>{today}</time>
         </header>
 
-        <a className="slipShortcut" href="/liff/upload">
-          📷 แนบสลิป / อ่านจากรูป
-        </a>
+        <button
+          type="button"
+          className="slipShortcut"
+          disabled={!ready || slipReading || !idToken}
+          onClick={() => slipInputRef.current?.click()}
+        >
+          {slipReading ? "กำลังอ่านสลิป..." : "📷 แนบสลิป / อ่านจากรูป"}
+        </button>
+        <input
+          ref={slipInputRef}
+          className="hiddenFileInput"
+          type="file"
+          accept="image/*"
+          onChange={readSlip}
+        />
 
         <form className="entryV2Form" onSubmit={submit}>
           <section className="entryBlock amountBlock">
@@ -217,6 +273,24 @@ export default function ManualPage() {
       </section>
     </main>
   );
+}
+
+async function compressImage(file: File) {
+  if (!file.type.startsWith("image/")) return file;
+
+  const bitmap = await createImageBitmap(file);
+  const maxSide = 1400;
+  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return file;
+
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.82));
+  if (!blob) return file;
+  return new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" });
 }
 
 async function safeJson(response: Response) {
