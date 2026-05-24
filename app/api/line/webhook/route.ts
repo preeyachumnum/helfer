@@ -52,7 +52,7 @@ async function handleImageMessage(event: LineEvent) {
       mimeType: image.mimeType
     });
 
-    const canSave = extraction.isSlip && Boolean(extraction.amount);
+    const canSave = extraction.isSlip && Boolean(extraction.amount) && extraction.confidence >= 0.75;
     if (!canSave) {
       await replyText(event.replyToken, formatSlipReply(extraction, false));
       return;

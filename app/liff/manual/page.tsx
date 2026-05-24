@@ -108,7 +108,11 @@ export default function ManualPage() {
       if (!response.ok) throw new Error(data?.message || "อ่านสลิปไม่สำเร็จ");
 
       const extraction = data.extraction;
-      if (extraction?.amount) setAmount(String(extraction.amount));
+      if (!extraction?.isSlip || extraction.confidence < 0.75 || !extraction.amount) {
+        throw new Error("OCR อ่านสลิปนี้ไม่มั่นใจพอ เลยไม่กรอกให้อัตโนมัติ กรุณากรอกเองก่อนค่ะ");
+      }
+
+      setAmount(String(extraction.amount));
       if (extraction?.type === "income") {
         setType("income");
         setCategory("เงินเข้า");
