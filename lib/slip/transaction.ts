@@ -23,7 +23,7 @@ export function slipExtractionToTransaction(input: {
     transactionAt: input.extraction.transactionAt,
     recordedAt: new Date().toISOString(),
     lineMessageId: input.lineMessageId,
-    rawText: input.extraction.rawText,
+    rawText: "",
     confidence: input.extraction.confidence,
     status: input.extraction.confidence >= 0.75 && input.extraction.amount ? "confirmed" : "needs_review"
   };

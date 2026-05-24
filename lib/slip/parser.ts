@@ -92,6 +92,15 @@ export function normalizeText(text: string) {
 }
 
 function extractAmount(lines: string[]) {
+  const amountLabelIndex = lines.findIndex((line) => /จำนวน\s*เงิน|ยอด\s*เงิน|amount|total/i.test(line));
+  if (amountLabelIndex >= 0) {
+    for (let offset = 0; offset <= 4; offset += 1) {
+      const line = lines[amountLabelIndex + offset] ?? "";
+      const values = moneyValues(line).filter((value) => value > 0 && value < 10000000);
+      if (values.length) return values[0];
+    }
+  }
+
   const candidates: number[] = [];
 
   for (let index = 0; index < lines.length; index += 1) {
