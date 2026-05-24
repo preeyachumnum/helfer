@@ -131,6 +131,10 @@ export default function ManualPage() {
           <time>{today}</time>
         </header>
 
+        <a className="slipShortcut" href="/liff/upload">
+          📷 แนบสลิป / อ่านจากรูป
+        </a>
+
         <form className="entryV2Form" onSubmit={submit}>
           <section className="entryBlock amountBlock">
             <div className="amountField">

@@ -1062,3 +1062,17 @@ button:active {
   border: 1px solid var(--line);
   background: #fff;
 }
+
+
+.slipShortcut {
+  display: block;
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: #fff;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 4px 10px rgba(14, 165, 233, 0.18);
+}
